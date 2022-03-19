@@ -5,56 +5,26 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>云盘上传</title>
-  <style type="text/css">
-    #instruct {
-      float: left;
-      padding-right: 10px;
-    }
-    #info {
-      padding-bottom: 10px;
-    }
-  </style>
 </head>
 
 <body>
-  <span id="info">
-    <span id="instruct">
-      <span>Phone:</span>
-      <br>
-      <span>Password:</span>
-      <br>
-    </span>
-    <span id="inputs">
-      <input type="text" id="phone"><span style="color: red;"> ON CONSTRUCTION </span>
-      <br>
-      <input type="text" id="password"><span style="color: red"> ON CONSTRUCTION </span>
-      <br>
-    </span>
-  </span>
-  <button id="login">Login</button>
-  <br>
   <input id="file" type="file" multiple/>
-  <br>
-  <button id="upload">Upload</button>
+
   <script src="https://cdn.bootcdn.net/ajax/libs/axios/0.20.0-0/axios.min.js"></script>
   <script>
-    const port            = '3000'
-    var   phone           = '15529469593'
-    var   password        = '2000530'
-    const fileUpdateTime  = {}
-    let   fileLength      = 0
-    let   cookieToken     = ''
+    const phone = '15529469593' // 这里填手机号
+    const password = '2000530' // 这里填密码
+    const fileUpdateTime = {}
+    let fileLength = 0
+    let cookieToken = ''
     if (!phone || !password) {
       const msg = '请设置你的手机号码和密码'
       alert(msg)
       throw new Error(msg)
     }
-    // login()
+    login()
     main()
-
     async function login() {
-      console.log(phone, password)
-
       const res = await axios({
         url: `/login/cellphone?phone=${phone}&password=${encodeURIComponent(password)}`,
         withCredentials: true, //关键
@@ -62,47 +32,25 @@
       cookieToken = res.data.cookie
     }
     function main() {
-      var files = {}
-      document
-        .querySelector('button[id="login"]')
-        .addEventListener('click', login)
       document
         .querySelector('input[type="file"]')
         .addEventListener('change', function (e) {
-          files = this.files
+          console.log(this.files)
+          let currentIndx = 0
           fileLength = this.files.length
-          // console.log(this.files)
-          // let currentIndx = 0
-          // fileLength = this.files.length
-          // for (const item of this.files) {
-          //   currentIndx += 1
-          //   upload(item, currentIndx)
-          // }
-        })
-      document
-        .querySelector('button[id="upload"]')
-        .addEventListener('click', function (e) {
-          if (isEmptyObject(files)) alert("Empty files!")
-          else {
-            let currentIndx = 0
-            for (const item of files) {
-              currentIndx += 1
-              upload(item, currentIndx)
-            }
+          for (const item of this.files) {
+            currentIndx += 1
+            upload(item, currentIndx)
           }
         })
     }
-    function isEmptyObject (obj) {
-      for (var n in obj)
-          return false
-      return true;
-    }
+
     function upload(file, currentIndx) {
       var formData = new FormData()
       formData.append('songFile', file)
       axios({
         method: 'post',
-        url: `http://localhost:${port}/cloud?time=${Date.now()}`,
+        url: `http://localhost:3000/cloud?time=${Date.now()}`,
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -120,7 +68,7 @@
         } else {
           console.error(`${file.name} 失败 ${fileUpdateTime[file.name]} 次`)
         }
-        // await login()
+        await login()
         upload(file, currentIndx)
       })
     }
